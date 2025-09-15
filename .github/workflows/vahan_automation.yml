@@ -34,13 +34,38 @@ jobs:
         export DISPLAY=:99
         Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
 
-    - name: Network diagnostics
+    - name: Enhanced network diagnostics
       run: |
-        echo "Testing network connectivity..."
-        ping -c 3 google.com || echo "Ping failed"
-        curl -I https://vahan.parivahan.gov.in/ || echo "Vahan site unreachable"
-        curl -I https://parivahan.gov.in/ || echo "Parivahan site unreachable"
-        echo "Network diagnostics completed"
+        echo "=== NETWORK DIAGNOSTICS ==="
+        echo "Date: $(date)"
+        echo "Runner IP info:"
+        curl -s ifconfig.me || echo "External IP check failed"
+        echo ""
+        
+        echo "DNS Resolution Test:"
+        nslookup google.com || echo "DNS lookup failed"
+        nslookup github.com || echo "GitHub DNS failed"
+        echo ""
+        
+        echo "Connectivity Tests:"
+        ping -c 3 8.8.8.8 || echo "Google DNS ping failed"
+        ping -c 3 1.1.1.1 || echo "Cloudflare DNS ping failed"
+        echo ""
+        
+        echo "HTTP Tests:"
+        curl -v --connect-timeout 10 https://httpbin.org/get || echo "HTTPBin failed"
+        curl -v --connect-timeout 10 https://api.github.com || echo "GitHub API failed"
+        curl -v --connect-timeout 10 https://google.com || echo "Google failed"
+        echo ""
+        
+        echo "Vahan Website Tests:"
+        curl -v --connect-timeout 10 https://vahan.parivahan.gov.in/ || echo "Vahan site unreachable"
+        curl -v --connect-timeout 10 https://parivahan.gov.in/ || echo "Parivahan site unreachable"
+        echo ""
+        
+        echo "Route Information:"
+        ip route show || echo "Route info failed"
+        echo "=== END DIAGNOSTICS ==="
     
     - name: Run Vahan automation
       run: |
